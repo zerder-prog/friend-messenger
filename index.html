@@ -1,0 +1,851 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRIEND.</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #080d18;
+    color: #e8edf7;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    background: #287de0;
+    color: white;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #4394f5;
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+input {
+    background: #18243a;
+    border: 1px solid #263c5a;
+    border-radius: 8px;
+    padding: 13px;
+    color: white;
+    outline: none;
+    width: 100%;
+}
+
+input:focus {
+    border-color: #398bff;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Авторизация */
+
+.auth {
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 35px;
+    background: #101a2c;
+    border: 1px solid #1d2b43;
+    border-radius: 16px;
+}
+
+.logo {
+    text-align: center;
+    color: #4595ff;
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #8493a9;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.auth h2 {
+    margin-bottom: 20px;
+}
+
+.field {
+    margin-bottom: 15px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #aebbd0;
+    font-size: 13px;
+}
+
+.auth button {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.switch {
+    text-align: center;
+    margin-top: 20px;
+    color: #8493a9;
+    font-size: 13px;
+}
+
+.switch span {
+    color: #4595ff;
+    cursor: pointer;
+}
+
+#status {
+    margin-top: 15px;
+    text-align: center;
+    color: #77b5ff;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Приложение */
+
+#app {
+    display: none;
+    max-width: 1100px;
+    margin: 20px auto;
+}
+
+.topbar {
+    background: #101a2c;
+    border: 1px solid #1d2b43;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.topbar h1 {
+    color: #4595ff;
+}
+
+.topbar p {
+    color: #8493a9;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.logout {
+    background: #26364e;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 15px;
+    min-height: 600px;
+}
+
+.sidebar, .chat {
+    background: #101a2c;
+    border: 1px solid #1d2b43;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.sidebar {
+    padding: 18px;
+}
+
+.sidebar h2 {
+    font-size: 19px;
+    margin-bottom: 15px;
+}
+
+#searchInput {
+    margin-bottom: 15px;
+}
+
+#userList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.user {
+    background: #18243a;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 13px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.user:hover {
+    border-color: #398bff;
+}
+
+.user.active {
+    background: #203b61;
+    border-color: #398bff;
+}
+
+.user small {
+    display: block;
+    color: #8493a9;
+    margin-top: 5px;
+}
+
+#listStatus {
+    color: #8493a9;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+/* Окно чата */
+
+.chat {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.chat-header {
+    padding: 18px;
+    border-bottom: 1px solid #26364e;
+    min-height: 70px;
+}
+
+.chat-header h2 {
+    font-size: 18px;
+}
+
+.chat-header p {
+    color: #8493a9;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+#messages {
+    flex: 1;
+    min-height: 400px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.empty {
+    color: #8493a9;
+    text-align: center;
+    margin: auto;
+    font-size: 14px;
+}
+
+.message {
+    max-width: 75%;
+    padding: 11px 14px;
+    border-radius: 12px;
+    background: #203047;
+    align-self: flex-start;
+    overflow-wrap: anywhere;
+}
+
+.message.mine {
+    background: #2469b9;
+    align-self: flex-end;
+}
+
+.message small {
+    display: block;
+    font-size: 10px;
+    opacity: .7;
+    margin-top: 6px;
+    text-align: right;
+}
+
+.chat-input {
+    padding: 15px;
+    border-top: 1px solid #26364e;
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input input {
+    flex: 1;
+    min-width: 0;
+}
+
+#sendButton {
+    min-width: 90px;
+}
+
+#chatStatus {
+    color: #8493a9;
+    font-size: 12px;
+    padding: 0 15px 12px;
+}
+
+@media(max-width: 700px) {
+    body {
+        padding: 8px;
+    }
+
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        max-height: 260px;
+        overflow-y: auto;
+    }
+
+    .chat {
+        min-height: 520px;
+    }
+
+    #messages {
+        min-height: 300px;
+    }
+
+    .topbar {
+        padding: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Авторизация -->
+
+<div class="auth" id="auth">
+    <div class="logo">FRIEND.</div>
+    <div class="subtitle">Твой личный мессенджер</div>
+
+    <div id="loginForm">
+        <h2>С возвращением!</h2>
+
+        <div class="field">
+            <label>Электронная почта</label>
+            <input id="loginEmail" type="email" placeholder="example@mail.com">
+        </div>
+
+        <div class="field">
+            <label>Пароль</label>
+            <input id="loginPassword" type="password" placeholder="Твой пароль">
+        </div>
+
+        <button id="loginButton" onclick="login()">Войти</button>
+
+        <div class="switch">
+            Нет аккаунта?
+            <span onclick="showRegister()">Зарегистрироваться</span>
+        </div>
+    </div>
+
+    <div id="registerForm" class="hidden">
+        <h2>Создать аккаунт</h2>
+
+        <div class="field">
+            <label>Никнейм</label>
+            <input id="regUsername" maxlength="24" placeholder="swourkey">
+        </div>
+
+        <div class="field">
+            <label>Электронная почта</label>
+            <input id="regEmail" type="email" placeholder="example@mail.com">
+        </div>
+
+        <div class="field">
+            <label>Пароль</label>
+            <input id="regPassword" type="password" placeholder="Минимум 8 символов">
+        </div>
+
+        <button id="registerButton" onclick="register()">Создать аккаунт</button>
+
+        <div class="switch">
+            Уже есть аккаунт?
+            <span onclick="showLogin()">Войти</span>
+        </div>
+    </div>
+
+    <div id="status"></div>
+</div>
+
+<!-- Мессенджер -->
+
+<div id="app">
+
+    <div class="topbar">
+        <div>
+            <h1>FRIEND.</h1>
+            <p>Вы вошли как <strong id="userName"></strong></p>
+        </div>
+
+        <button class="logout" onclick="logout()">Выйти</button>
+    </div>
+
+    <div class="layout">
+
+        <div class="sidebar">
+            <h2>Друзья</h2>
+
+            <input
+                id="searchInput"
+                placeholder="Найти пользователя..."
+                oninput="filterUsers()"
+            >
+
+            <div id="listStatus">Загрузка...</div>
+            <div id="userList"></div>
+        </div>
+
+        <div class="chat">
+
+            <div class="chat-header">
+                <h2 id="chatTitle">FRIEND.</h2>
+                <p id="chatSubtitle">Выбери пользователя слева</p>
+            </div>
+
+            <div id="messages">
+                <div class="empty">
+                    Выбери друга, чтобы начать переписку
+                </div>
+            </div>
+
+            <div id="chatStatus"></div>
+
+            <div class="chat-input">
+                <input
+                    id="messageInput"
+                    placeholder="Напиши сообщение..."
+                    disabled
+                    onkeydown="if(event.key === 'Enter') sendMessage()"
+                >
+
+                <button id="sendButton" onclick="sendMessage()" disabled>
+                    Отправить
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://tndqtyzfjeiqiujltnmj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_m1xcjLm90fo1WpWrvnq8-g_QwcskBJT";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const $ = id => document.getElementById(id);
+
+let currentUserId = null;
+let allUsers = [];
+let selectedUser = null;
+let realtimeChannel = null;
+
+function setStatus(message, error = false) {
+    $("status").textContent = message;
+    $("status").style.color = error ? "#ff7777" : "#77b5ff";
+}
+
+function showLogin() {
+    $("loginForm").classList.remove("hidden");
+    $("registerForm").classList.add("hidden");
+    setStatus("");
+}
+
+function showRegister() {
+    $("loginForm").classList.add("hidden");
+    $("registerForm").classList.remove("hidden");
+    setStatus("");
+}
+
+async function ensureProfile(user) {
+    const { data, error } = await supabaseClient
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+    if (error) throw error;
+
+    if (data) return data.username;
+
+    const username = user.user_metadata?.username;
+
+    if (!username) throw new Error("Не найден никнейм.");
+
+    const { error: insertError } = await supabaseClient
+        .from("profiles")
+        .insert({
+            id: user.id,
+            username
+        });
+
+    if (insertError) throw insertError;
+
+    return username;
+}
+
+async function login() {
+    $("loginButton").disabled = true;
+
+    try {
+        const email = $("loginEmail").value.trim();
+        const password = $("loginPassword").value;
+
+        if (!email || !password) throw new Error("Заполни все поля.");
+
+        const { data, error } = await supabaseClient.auth
+            .signInWithPassword({ email, password });
+
+        if (error) throw error;
+
+        const username = await ensureProfile(data.user);
+        showApp(username, data.user.id);
+
+    } catch (error) {
+        setStatus(error.message, true);
+    } finally {
+        $("loginButton").disabled = false;
+    }
+}
+
+async function register() {
+    $("registerButton").disabled = true;
+
+    try {
+        const username = $("regUsername").value.trim();
+        const email = $("regEmail").value.trim();
+        const password = $("regPassword").value;
+
+        if (!/^[a-zA-Z0-9_]{3,24}$/.test(username)) {
+            throw new Error("Ник: 3–24 символа, латинские буквы, цифры и _.");
+        }
+
+        if (!email || !email.includes("@")) {
+            throw new Error("Проверь электронную почту.");
+        }
+
+        if (password.length < 8) {
+            throw new Error("Пароль должен быть минимум 8 символов.");
+        }
+
+        const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { username }
+            }
+        });
+
+        if (error) throw error;
+
+        if (data.session && data.user) {
+            const name = await ensureProfile(data.user);
+            showApp(name, data.user.id);
+        } else {
+            setStatus("Аккаунт создан! Подтверди почту и войди.");
+        }
+
+    } catch (error) {
+        setStatus(error.message, true);
+    } finally {
+        $("registerButton").disabled = false;
+    }
+}
+
+function showApp(username, userId) {
+    currentUserId = userId;
+
+    $("auth").style.display = "none";
+    $("app").style.display = "block";
+    $("userName").textContent = username;
+
+    loadUsers();
+}
+
+async function loadUsers() {
+    $("listStatus").textContent = "Загружаем пользователей...";
+
+    const { data, error } = await supabaseClient
+        .from("profiles")
+        .select("id, username")
+        .neq("id", currentUserId)
+        .order("username");
+
+    if (error) {
+        $("listStatus").textContent = "Ошибка: " + error.message;
+        return;
+    }
+
+    allUsers = data || [];
+    filterUsers();
+}
+
+function filterUsers() {
+    const query = $("searchInput").value.trim().toLowerCase();
+
+    const filtered = allUsers.filter(user =>
+        user.username.toLowerCase().includes(query)
+    );
+
+    $("userList").replaceChildren();
+
+    $("listStatus").textContent = filtered.length
+        ? "Пользователей: " + filtered.length
+        : "Пока никого не найдено.";
+
+    filtered.forEach(user => {
+        const card = document.createElement("div");
+        card.className = "user";
+
+        if (selectedUser?.id === user.id) {
+            card.classList.add("active");
+        }
+
+        const name = document.createElement("strong");
+        name.textContent = "@" + user.username;
+
+        const subtitle = document.createElement("small");
+        subtitle.textContent = "Нажми, чтобы открыть чат";
+
+        card.append(name, subtitle);
+        card.onclick = () => openChat(user);
+
+        $("userList").append(card);
+    });
+}
+
+async function openChat(user) {
+    selectedUser = user;
+
+    filterUsers();
+
+    $("chatTitle").textContent = "@" + user.username;
+    $("chatSubtitle").textContent = "Личная переписка";
+    $("messages").replaceChildren();
+
+    $("messageInput").disabled = false;
+    $("sendButton").disabled = false;
+    $("chatStatus").textContent = "Загружаем сообщения...";
+
+    if (realtimeChannel) {
+        await supabaseClient.removeChannel(realtimeChannel);
+        realtimeChannel = null;
+    }
+
+    await loadMessages();
+
+    realtimeChannel = supabaseClient
+        .channel("chat-" + currentUserId + "-" + user.id)
+        .on(
+            "postgres_changes",
+            {
+                event: "INSERT",
+                schema: "public",
+                table: "messages",
+                filter: "receiver_id=eq." + currentUserId
+            },
+            payload => {
+                const message = payload.new;
+
+                if (
+                    selectedUser &&
+                    message.sender_id === selectedUser.id
+                ) {
+                    addMessage(message);
+                }
+            }
+        )
+        .subscribe(status => {
+            if (status === "CHANNEL_ERROR") {
+                $("chatStatus").textContent =
+                    "Ошибка подключения к обновлениям.";
+            }
+        });
+}
+
+async function loadMessages() {
+    if (!selectedUser) return;
+
+    const peerId = selectedUser.id;
+
+    const { data, error } = await supabaseClient
+        .from("messages")
+        .select("*")
+        .or(
+            "and(sender_id.eq." + currentUserId +
+            ",receiver_id.eq." + peerId +
+            "),and(sender_id.eq." + peerId +
+            ",receiver_id.eq." + currentUserId + ")"
+        )
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        $("chatStatus").textContent = "Ошибка: " + error.message;
+        return;
+    }
+
+    if (!selectedUser || selectedUser.id !== peerId) return;
+
+    $("messages").replaceChildren();
+
+    if (!data.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "Пока нет сообщений. Напиши первым!";
+        $("messages").append(empty);
+    } else {
+        data.forEach(addMessage);
+    }
+
+    $("chatStatus").textContent = "";
+    scrollMessages();
+}
+
+function addMessage(message) {
+    const empty = $("messages").querySelector(".empty");
+    if (empty) empty.remove();
+
+    const item = document.createElement("div");
+
+    item.className = "message" +
+        (message.sender_id === currentUserId ? " mine" : "");
+
+    const content = document.createElement("div");
+    content.textContent = message.content;
+
+    const time = document.createElement("small");
+    time.textContent = new Date(message.created_at).toLocaleTimeString(
+        "ru-RU",
+        { hour: "2-digit", minute: "2-digit" }
+    );
+
+    item.append(content, time);
+    $("messages").append(item);
+
+    scrollMessages();
+}
+
+function scrollMessages() {
+    $("messages").scrollTop = $("messages").scrollHeight;
+}
+
+async function sendMessage() {
+    if (!selectedUser) return;
+
+    const content = $("messageInput").value.trim();
+
+    if (!content) return;
+
+    if (content.length > 5000) {
+        $("chatStatus").textContent = "Сообщение слишком длинное.";
+        return;
+    }
+
+    const button = $("sendButton");
+    button.disabled = true;
+
+    try {
+        const peer = selectedUser;
+
+        const { data, error } = await supabaseClient
+            .from("messages")
+            .insert({
+                sender_id: currentUserId,
+                receiver_id: peer.id,
+                content: content
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        if (selectedUser?.id === peer.id) {
+            addMessage(data);
+        }
+
+        $("messageInput").value = "";
+        $("chatStatus").textContent = "";
+
+    } catch (error) {
+        $("chatStatus").textContent = "Не удалось отправить: " + error.message;
+    } finally {
+        button.disabled = !selectedUser;
+    }
+}
+
+async function logout() {
+    if (realtimeChannel) {
+        await supabaseClient.removeChannel(realtimeChannel);
+        realtimeChannel = null;
+    }
+
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    currentUserId = null;
+    selectedUser = null;
+    allUsers = [];
+
+    $("app").style.display = "none";
+    $("auth").style.display = "block";
+
+    $("searchInput").value = "";
+    $("userList").replaceChildren();
+    $("messages").replaceChildren();
+
+    showLogin();
+}
+
+async function checkSession() {
+    const { data, error } = await supabaseClient.auth.getUser();
+
+    if (error || !data.user) return;
+
+    try {
+        const username = await ensureProfile(data.user);
+        showApp(username, data.user.id);
+    } catch (error) {
+        setStatus(error.message, true);
+    }
+}
+
+checkSession();
+</script>
+
+</body>
+</html>
+
